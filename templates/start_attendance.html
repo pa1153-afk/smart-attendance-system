@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Start Attendance</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      color: #333;
+    }
+
+    /* ── Navbar ── */
+    .navbar {
+      background: #2c3e50;
+      padding: 14px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .navbar h1  { color: #fff; font-size: 1.15rem; }
+    .navbar a   { color: #adb5bd; text-decoration: none; font-size: 0.9rem; }
+    .navbar a:hover { color: #fff; }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 0 20px;
+    }
+
+    .page-title    { font-size: 1.4rem; font-weight: 700; color: #2c3e50; margin-bottom: 6px; }
+    .page-subtitle { color: #6c757d; font-size: 0.9rem; margin-bottom: 28px; }
+
+    /* ── Card ── */
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 28px 32px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #adb5bd;
+      margin-bottom: 18px;
+    }
+
+    /* ── Big status indicator ── */
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .status-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .status-dot.idle    { background: #ced4da; }
+    .status-dot.running { background: #43a047; animation: pulse 1.2s ease-in-out infinite; }
+    .status-dot.stopped { background: #e53935; }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(67,160,71,0.5); }
+      50%       { box-shadow: 0 0 0 8px rgba(67,160,71,0); }
+    }
+    .status-text-big     { font-size: 1.05rem; font-weight: 600; }
+    .status-subtext      { font-size: 0.83rem; color: #6c757d; margin-top: 3px; }
+
+    /* ── Buttons ── */
+    .btn-row { display: flex; gap: 12px; }
+
+    .btn {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 7px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+    }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-start { background: #2e7d32; color: #fff; }
+    .btn-start:hover:not(:disabled) { background: #1b5e20; }
+
+    .btn-stop  { background: #c62828; color: #fff; }
+    .btn-stop:hover:not(:disabled)  { background: #8b0000; }
+
+    /* ── Info / message strip ── */
+    #msg-box {
+      display: none;
+      margin-top: 18px;
+      padding: 12px 16px;
+      border-radius: 7px;
+      font-size: 0.88rem;
+      line-height: 1.55;
+    }
+    #msg-box.info    { background: #e3f2fd; color: #1565c0; border-left: 4px solid #1976d2; }
+    #msg-box.success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #43a047; }
+    #msg-box.error   { background: #fdecea; color: #c62828; border-left: 4px solid #e53935; }
+    #msg-box.warning { background: #fff8e1; color: #f57f17; border-left: 4px solid #f9a825; }
+
+    /* ── How it works card ── */
+    .steps { list-style: none; padding: 0; }
+    .steps li {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid #f1f3f5;
+      font-size: 0.9rem;
+    }
+    .steps li:last-child { border-bottom: none; }
+    .step-num {
+      width: 26px; height: 26px;
+      background: #2c3e50;
+      color: #fff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .step-body strong { display: block; font-size: 0.88rem; color: #343a40; }
+    .step-body span   { color: #6c757d; font-size: 0.82rem; }
+
+    /* Quick link */
+    .quick-link {
+      display: inline-block;
+      margin-top: 4px;
+      font-size: 0.83rem;
+      color: #1565c0;
+      text-decoration: none;
+    }
+    .quick-link:hover { text-decoration: underline; }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid #90caf9;
+      border-top-color: #1565c0;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+
+<body>
+
+  <div class="navbar">
+    <h1>Smart Attendance System</h1>
+    <a href="{{ url_for('dashboard') }}">← Dashboard</a>
+  </div>
+
+  <div class="container">
+
+    <div class="page-title">Start Attendance Session</div>
+    <div class="page-subtitle">
+      Click Start to open the face recognition camera and begin marking attendance automatically.
+    </div>
+
+    <!-- ── Control card ── -->
+    <div class="card">
+      <div class="card-title">Session Control</div>
+
+      <!-- Status indicator -->
+      <div class="status-indicator">
+        <div class="status-dot idle" id="status-dot"></div>
+        <div>
+          <div class="status-text-big" id="status-text">Ready to start</div>
+          <div class="status-subtext"  id="status-subtext">No active session</div>
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="btn-row">
+        <button class="btn btn-start" id="btn-start" onclick="startSession()">
+          ▶ Start Attendance
+        </button>
+        <button class="btn btn-stop"  id="btn-stop"  onclick="stopSession()" disabled>
+          ■ Stop Session
+        </button>
+      </div>
+
+      <!-- Message strip -->
+      <div id="msg-box"></div>
+    </div>
+
+    <!-- ── How it works card ── -->
+    <div class="card">
+      <div class="card-title">How It Works</div>
+      <ul class="steps">
+        <li>
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Click "Start Attendance"</strong>
+            <span>The face recognition window opens on your screen.</span>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Students face the camera</strong>
+            <span>Each recognized face is matched against registered students.</span>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Attendance is recorded automatically</strong>
+            <span>A record is saved in the database with a 30-second duplicate guard.</span>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>Stop when done</strong>
+            <span>Click "Stop Session" or press <kbd>q</kbd> in the camera window.</span>
+            <br/>
+            <a href="{{ url_for('view_attendance') }}" class="quick-link">
+              → View recorded attendance
+            </a>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+
+  <script>
+    const btnStart    = document.getElementById('btn-start');
+    const btnStop     = document.getElementById('btn-stop');
+    const statusDot   = document.getElementById('status-dot');
+    const statusText  = document.getElementById('status-text');
+    const statusSub   = document.getElementById('status-subtext');
+    const msgBox      = document.getElementById('msg-box');
+
+    let pollInterval  = null;
+
+    // ── Helper: show message strip ─────────────────────────────────
+    function showMsg(type, html) {
+      msgBox.className  = type;
+      msgBox.style.display = 'block';
+      msgBox.innerHTML  = html;
+    }
+    function hideMsg() { msgBox.style.display = 'none'; }
+
+    // ── Helper: set UI to a given state ───────────────────────────
+    function setUIState(state) {
+      if (state === 'running') {
+        statusDot.className      = 'status-dot running';
+        statusText.textContent   = 'Session Active';
+        statusSub.textContent    = 'Face recognition is running — camera window is open';
+        btnStart.disabled        = true;
+        btnStop.disabled         = false;
+        btnStart.textContent     = '▶ Start Attendance';
+
+      } else if (state === 'idle') {
+        statusDot.className      = 'status-dot idle';
+        statusText.textContent   = 'Ready to start';
+        statusSub.textContent    = 'No active session';
+        btnStart.disabled        = false;
+        btnStop.disabled         = true;
+        btnStart.textContent     = '▶ Start Attendance';
+
+      } else if (state === 'stopped') {
+        statusDot.className      = 'status-dot stopped';
+        statusText.textContent   = 'Session Stopped';
+        statusSub.textContent    = 'Click Start to begin a new session';
+        btnStart.disabled        = false;
+        btnStop.disabled         = true;
+        btnStart.textContent     = '▶ Start Attendance';
+      }
+    }
+
+    // ── Poll server to detect when session ends (e.g. user presses q) ─
+    function startPolling() {
+      pollInterval = setInterval(async () => {
+        try {
+          const res  = await fetch('/attendance_state');
+          const data = await res.json();
+          if (!data.running) {
+            clearInterval(pollInterval);
+            setUIState('stopped');
+            showMsg('warning',
+              '⚠️ &nbsp;The attendance session has ended (camera was closed or <kbd>q</kbd> was pressed).'
+            );
+          }
+        } catch (_) { /* network hiccup — ignore */ }
+      }, 2000);   // check every 2 seconds
+    }
+
+    // ── Start button handler ───────────────────────────────────────
+    async function startSession() {
+      btnStart.disabled    = true;
+      btnStart.textContent = 'Starting…';
+      hideMsg();
+
+      try {
+        const res  = await fetch('/start_attendance', { method: 'POST' });
+        const data = await res.json();
+
+        if (data.success) {
+          setUIState('running');
+          showMsg('success',
+            `<span class="spinner"></span>
+             <strong>Session started.</strong> &nbsp;${data.message}`
+          );
+          if (pollInterval) clearInterval(pollInterval);
+          startPolling();
+
+        } else {
+          setUIState('idle');
+          showMsg('error', `❌ &nbsp;<strong>Could not start:</strong> ${data.message}`);
+        }
+
+      } catch (err) {
+        setUIState('idle');
+        showMsg('error', '❌ &nbsp;Could not reach the server. Is Flask running?');
+      }
+    }
+
+    // ── Stop button handler ────────────────────────────────────────
+    async function stopSession() {
+      btnStop.disabled = true;
+      if (pollInterval) clearInterval(pollInterval);
+
+      try {
+        const res  = await fetch('/stop_attendance', { method: 'POST' });
+        const data = await res.json();
+
+        if (data.success) {
+          setUIState('stopped');
+          showMsg('warning', `⏹ &nbsp;<strong>Session stopped.</strong> ${data.message}`);
+        } else {
+          showMsg('error', `❌ &nbsp;${data.message}`);
+          btnStop.disabled = false;
+        }
+
+      } catch (err) {
+        showMsg('error', '❌ &nbsp;Network error while stopping.');
+        btnStop.disabled = false;
+      }
+    }
+
+    // ── On page load: sync UI with server state ────────────────────
+    (async () => {
+      try {
+        const res  = await fetch('/attendance_state');
+        const data = await res.json();
+        if (data.running) {
+          setUIState('running');
+          showMsg('info',
+            '<span class="spinner"></span> &nbsp;An attendance session is already running.'
+          );
+          startPolling();
+        }
+      } catch (_) { /* ignore on load */ }
+    })();
+  </script>
+
+</body>
+</html>

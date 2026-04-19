@@ -1,0 +1,15 @@
+# requirements.txt
+# Install all dependencies with:
+#   pip install -r requirements.txt
+#
+# Note: face_recognition requires cmake and dlib.
+# On Windows, install cmake first: https://cmake.org/download/
+# On Linux/macOS, run: sudo apt-get install cmake  (or brew install cmake)
+
+flask
+opencv-python
+numpy
+dlib-bin
+face-recognition-models
+click
+pillow

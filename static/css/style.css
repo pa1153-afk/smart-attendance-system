@@ -1,0 +1,159 @@
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* BODY */
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #1e1e2f, #2b2b45);
+    color: white;
+}
+
+/* DASHBOARD CONTAINER */
+.dashboard-container {
+    padding: 40px;
+}
+
+/* NAVBAR */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.navbar h2 {
+    font-weight: 600;
+}
+
+/* BUTTON */
+.btn {
+    background: linear-gradient(135deg, #007bff, #00c6ff);
+    padding: 10px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: white;
+    font-weight: 500;
+    transition: 0.3s ease;
+}
+
+.btn:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+/* WELCOME */
+.welcome {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 28px;
+}
+
+/* GRID */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+}
+
+/* CARD */
+.card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    padding: 25px;
+    border-radius: 16px;
+    text-align: center;
+    transition: 0.3s ease;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.card:hover {
+    transform: translateY(-8px) scale(1.02);
+}
+
+/* CARD TEXT */
+.card h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.card h1 {
+    font-size: 32px;
+    color: #00c6ff;
+}
+
+/* SMALL TEXT */
+.card p {
+    font-size: 13px;
+    color: #ccc;
+    margin-bottom: 10px;
+}
+
+/* LOGIN PAGE (KEEP IT CONSISTENT) */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* LOGIN CARD */
+.card.login {
+    width: 350px;
+}
+
+/* INPUT */
+input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+/* ERROR */
+.error-message {
+    color: #ff6b6b;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* LOGIN PREMIUM FIX */
+
+.title {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #aaa;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+input {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: none;
+    outline: none;
+}
+
+input::placeholder {
+    color: #ccc;
+}
+
+/* center card vertically */
+.container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/static/css/style.css?v=999">
+</head>
+<body>
+
+<div class="dashboard-container">
+
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <h2>🚀 Smart Attendance</h2>
+    <a href="{{ url_for('logout') }}" class="btn">Logout</a>
+  </div>
+
+  <!-- WELCOME -->
+  <h1 class="welcome">Welcome Admin 👋</h1>
+
+  <!-- 🔥 STATS SECTION -->
+  <div class="grid">
+
+    <div class="card">
+      <h3>👤 Total Students</h3>
+      <h1>{{ stats.total_students }}</h1>
+    </div>
+
+    <div class="card">
+      <h3>📅 Today's Attendance</h3>
+      <h1>{{ stats.today_attendance }}</h1>
+    </div>
+
+    <div class="card">
+      <h3>🧠 Register Student</h3>
+      <p>Add new student face data</p>
+      <a href="{{ url_for('register') }}" class="btn">Go</a>
+    </div>
+
+    <div class="card">
+      <h3>📷 Start Attendance</h3>
+      <p>Run face recognition system</p>
+      <a href="{{ url_for('attendance') }}" class="btn">Start</a>
+    </div>
+
+    <div class="card">
+      <h3>📊 View Attendance</h3>
+      <p>Check attendance records</p>
+      <a href="{{ url_for('view_attendance') }}" class="btn">View</a>
+    </div>
+
+    <div class="card">
+      <h3>⬇ Export CSV</h3>
+      <p>Download attendance data</p>
+      <a href="{{ url_for('export') }}" class="btn">Download</a>
+    </div>
+
+  </div>
+
+  <!-- EXTRA TOUCH -->
+  <p style="text-align:center; margin-top:30px; color:gray;">
+    🚀 Smart Attendance System — Real-Time Face Recognition Enabled
+  </p>
+
+</div>
+
+</body>
+</html>

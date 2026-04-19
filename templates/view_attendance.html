@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>View Attendance</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      color: #333;
+    }
+
+    /* ── Top navigation bar ── */
+    .navbar {
+      background: #2c3e50;
+      padding: 14px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .navbar h1 {
+      color: #fff;
+      font-size: 1.2rem;
+      letter-spacing: 0.5px;
+    }
+
+    .navbar a {
+      color: #adb5bd;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+
+    .navbar a:hover {
+      color: #fff;
+    }
+
+    /* ── Page wrapper ── */
+    .container {
+      max-width: 960px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 18px 28px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      flex: 1;
+      text-align: center;
+    }
+
+    .stat-card .number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+
+    .stat-card .label {
+      font-size: 0.82rem;
+      color: #888;
+      margin-top: 4px;
+    }
+
+    /* ── Table card ── */
+    .table-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    .table-card-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid #e9ecef;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .table-card-header h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .badge {
+      background: #e8f5e9;
+      color: #2e7d32;
+      font-size: 0.78rem;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+
+    /* ── Table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: #f8f9fa;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 12px 24px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #6c757d;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #f1f3f5;
+      transition: background 0.15s;
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: #f8f9fa;
+    }
+
+    tbody td {
+      padding: 13px 24px;
+      font-size: 0.92rem;
+      color: #495057;
+    }
+
+    /* Student ID pill */
+    .student-pill {
+      display: inline-block;
+      background: #e3f2fd;
+      color: #1565c0;
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 3px 12px;
+      border-radius: 12px;
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #adb5bd;
+    }
+
+    .empty-state .icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    .empty-state p {
+      font-size: 0.95rem;
+    }
+
+    /* ── Back button ── */
+    .btn-back {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 9px 20px;
+      background: #2c3e50;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      transition: background 0.2s;
+    }
+
+    .btn-back:hover {
+      background: #1a252f;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Navigation bar -->
+  <div class="navbar">
+    <h1>Smart Attendance System</h1>
+    <a href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+  </div>
+
+  <div class="container">
+
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="number">{{ records | length }}</div>
+        <div class="label">Total Records</div>
+      </div>
+      <div class="stat-card">
+        <div class="number">{{ records | map(attribute='student_id') | unique | list | length }}</div>
+        <div class="label">Unique Students</div>
+      </div>
+      <div class="stat-card">
+        <div class="number">
+          {% if records %}
+            {{ records[0].timestamp.strftime('%d %b') }}
+          {% else %}
+            —
+          {% endif %}
+        </div>
+        <div class="label">Latest Entry</div>
+      </div>
+    </div>
+
+    <!-- Attendance table -->
+    <div class="table-card">
+      <div class="table-card-header">
+        <h2>Attendance Records</h2>
+        <span class="badge">{{ records | length }} entries</span>
+      </div>
+
+      {% if records %}
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Student ID</th>
+            <th>Date</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in records %}
+          <tr>
+            <td>{{ record.id }}</td>
+            <td><span class="student-pill">{{ record.student_id }}</span></td>
+            <td>{{ record.timestamp.strftime('%Y-%m-%d') }}</td>
+            <td>{{ record.timestamp.strftime('%H:%M:%S') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      {% else %}
+      <!-- Empty state when no records exist -->
+      <div class="empty-state">
+        <div class="icon">📋</div>
+        <p>No attendance records found.</p>
+        <p>Run face recognition to start marking attendance.</p>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <a href="{{ url_for('dashboard') }}" class="btn-back">← Back to Dashboard</a>
+
+  </div>
+
+</body>
+</html>

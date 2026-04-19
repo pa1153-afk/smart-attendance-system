@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register Student</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      color: #333;
+    }
+
+    /* ── Navbar ── */
+    .navbar {
+      background: #2c3e50;
+      padding: 14px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .navbar h1  { color: #fff; font-size: 1.15rem; }
+    .navbar a   { color: #adb5bd; text-decoration: none; font-size: 0.9rem; }
+    .navbar a:hover { color: #fff; }
+
+    /* ── Page layout ── */
+    .container {
+      max-width: 520px;
+      margin: 50px auto;
+      padding: 0 20px;
+    }
+
+    .page-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 6px;
+    }
+    .page-subtitle {
+      color: #6c757d;
+      font-size: 0.9rem;
+      margin-bottom: 28px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 32px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+    }
+
+    /* ── Form elements ── */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 6px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #dee2e6;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      color: #333;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus {
+      border-color: #2c3e50;
+    }
+    .hint {
+      font-size: 0.78rem;
+      color: #adb5bd;
+      margin-top: 4px;
+    }
+
+    /* ── Submit button ── */
+    .btn-primary {
+      width: 100%;
+      padding: 12px;
+      background: #2c3e50;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+    }
+    .btn-primary:hover:not(:disabled) { background: #1a252f; }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* ── Status banner ── */
+    #status-box {
+      display: none;
+      margin-top: 20px;
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    #status-box.info    { background: #e3f2fd; color: #1565c0; border-left: 4px solid #1976d2; }
+    #status-box.success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #43a047; }
+    #status-box.error   { background: #fdecea; color: #c62828; border-left: 4px solid #e53935; }
+
+    /* Status icon + text layout */
+    .status-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .status-icon { font-size: 1.2rem; flex-shrink: 0; }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      width: 18px; height: 18px;
+      border: 2.5px solid #90caf9;
+      border-top-color: #1565c0;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Progress dots */
+    .dots::after {
+      content: '';
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+    @keyframes dots {
+      0%   { content: ''; }
+      25%  { content: '.'; }
+      50%  { content: '..'; }
+      75%  { content: '...'; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="navbar">
+    <h1>Smart Attendance System</h1>
+    <a href="{{ url_for('dashboard') }}">← Dashboard</a>
+  </div>
+
+  <div class="container">
+
+    <div class="page-title">Register New Student</div>
+    <div class="page-subtitle">
+      Fill in the details below. The webcam will open automatically to capture face images.
+    </div>
+
+    <div class="card">
+      <form id="reg-form">
+
+        <div class="form-group">
+          <label for="student_id">Student ID</label>
+          <input type="text" id="student_id" placeholder="e.g. S001" autocomplete="off" required/>
+          <div class="hint">Use a unique ID for each student (e.g. S001, S002)</div>
+        </div>
+
+        <div class="form-group">
+          <label for="student_name">Student Name</label>
+          <input type="text" id="student_name" placeholder="e.g. John Doe" autocomplete="off" required/>
+        </div>
+
+        <button type="submit" class="btn-primary" id="submit-btn">
+          Open Camera &amp; Register
+        </button>
+
+      </form>
+
+      <!-- Status box (hidden until action) -->
+      <div id="status-box">
+        <div class="status-row">
+          <div id="status-icon"></div>
+          <div id="status-text"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const form       = document.getElementById('reg-form');
+    const submitBtn  = document.getElementById('submit-btn');
+    const statusBox  = document.getElementById('status-box');
+    const statusIcon = document.getElementById('status-icon');
+    const statusText = document.getElementById('status-text');
+
+    let pollInterval = null;   // holds the setInterval reference
+
+    // ── Show a status message ──────────────────────────────────────
+    function showStatus(type, iconHtml, message) {
+      statusBox.className = type;          // 'info' | 'success' | 'error'
+      statusBox.style.display = 'block';
+      statusIcon.innerHTML = iconHtml;
+      statusText.innerHTML  = message;
+    }
+
+    // ── Poll the server until registration finishes ────────────────
+    function pollStatus(studentId) {
+      let attempts = 0;
+      const MAX_WAIT = 60;   // stop polling after 60 seconds
+
+      pollInterval = setInterval(async () => {
+        attempts++;
+
+        try {
+          const res  = await fetch(`/registration_status/${studentId}`);
+          const data = await res.json();
+
+          if (data.status === 'done') {
+            clearInterval(pollInterval);
+            showStatus('success',
+              '✅',
+              `<strong>Registration complete!</strong><br/>
+               Face data saved for student <strong>${studentId}</strong>.<br/>
+               You can now register another student or start attendance.`
+            );
+            submitBtn.disabled  = false;
+            submitBtn.textContent = 'Open Camera & Register';
+
+          } else if (data.status === 'failed') {
+            clearInterval(pollInterval);
+            showStatus('error',
+              '❌',
+              `<strong>Registration failed.</strong><br/>
+               Make sure the webcam is accessible and a face is visible.`
+            );
+            submitBtn.disabled  = false;
+            submitBtn.textContent = 'Open Camera & Register';
+
+          } else if (attempts >= MAX_WAIT) {
+            // Timed out
+            clearInterval(pollInterval);
+            showStatus('error',
+              '⚠️',
+              `<strong>Timeout.</strong> Registration took too long.<br/>
+               Check the terminal for errors and try again.`
+            );
+            submitBtn.disabled  = false;
+            submitBtn.textContent = 'Open Camera & Register';
+          }
+          // else: still 'running' — keep polling
+
+        } catch (err) {
+          clearInterval(pollInterval);
+          showStatus('error', '❌', 'Network error while checking status.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Open Camera & Register';
+        }
+      }, 1000);   // check every second
+    }
+
+    // ── Form submit ────────────────────────────────────────────────
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const studentId   = document.getElementById('student_id').value.trim();
+      const studentName = document.getElementById('student_name').value.trim();
+
+      if (!studentId || !studentName) return;
+
+      // Reset any previous poll
+      if (pollInterval) clearInterval(pollInterval);
+
+      // Disable button + show loading
+      submitBtn.disabled    = true;
+      submitBtn.textContent = 'Starting camera…';
+
+      showStatus('info',
+        '<div class="spinner"></div>',
+        `<strong>Camera opening<span class="dots"></span></strong><br/>
+         Look at the camera on your screen. 15 images will be captured automatically.<br/>
+         <em>Do not close the camera window.</em>`
+      );
+
+      try {
+        const res  = await fetch('/register_student', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ student_id: studentId, student_name: studentName })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          // Update message then start polling
+          showStatus('info',
+            '<div class="spinner"></div>',
+            `<strong>Capturing images<span class="dots"></span></strong><br/>
+             ${data.message}`
+          );
+          pollStatus(studentId);
+
+        } else {
+          // Server returned an error before even starting
+          showStatus('error', '❌', `<strong>Error:</strong> ${data.message}`);
+          submitBtn.disabled    = false;
+          submitBtn.textContent = 'Open Camera & Register';
+        }
+
+      } catch (err) {
+        showStatus('error', '❌', 'Could not connect to server. Is Flask running?');
+        submitBtn.disabled    = false;
+        submitBtn.textContent = 'Open Camera & Register';
+      }
+    });
+  </script>
+
+</body>
+</html>
